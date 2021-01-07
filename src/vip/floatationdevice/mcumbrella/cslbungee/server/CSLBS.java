@@ -1,17 +1,23 @@
 package vip.floatationdevice.mcumbrella.cslbungee.server;
+
 import net.md_5.bungee.api.plugin.*;
+
 import java.net.*;
 import java.io.*;
+import java.util.*;
 public class CSLBS extends Plugin
 {
 	int port=14514;
 	public static CSLBS main;
 	long round;
 	boolean valid=false;
+	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
 	public void onEnable()
 	{
 		CSLBS.main=this;
 		getLogger().info("Enabling.");
+		getProxy().getPluginManager().registerCommand(this, new CSLBSC("cslbs"));
+		getProxy().getPluginManager().registerListener(this, new CSLBSE());
 		new Thread("CSLBungee Server")
 		{
 			public void run()
@@ -25,68 +31,108 @@ public class CSLBS extends Plugin
 				    	round++;
 				    	getLogger().info("Round "+round);
 				    	Socket socket = server.accept();
+				    	getLogger().info("Receiving data");
 				    	valid=true;
+				    	Thread t=new Thread("CSLBungee-Server Connection Timer")
+				    	{
+				    		public void run()
+				    		{
+				    			//getLogger().info("Timer started");
+				    			try {
+									Thread.sleep(1000);
+									socket.close();
+									valid=false;
+								} catch (Throwable e) {
+									e.printStackTrace();
+								}
+				    		}
+				    	};
+				    	t.start();
+
 					    InputStream inputStream = socket.getInputStream();
-					    byte[] bytes = new byte[1024];
+					    byte[] bytes = new byte[64];
 					    int len;
 					    StringBuilder sb = new StringBuilder();
-					    while ((len = inputStream.read(bytes)) != -1) {
-					      //指定编码格式UTF-8
-					      sb.append(new String(bytes, 0, len,"UTF-8"));
-						    if(sb.toString().startsWith("GET "))
-						    {
-						    	valid=false;
-						    	getLogger().warning("Got HTTP request");
-						    	try
-						    	{
-							    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
-							    	osw.write("HTTP/1.1 200 OK\r\n");
-							    	osw.write("Server: CSLBungee-Server/1.1\r\n");
-						            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
-						            osw.write("Transfer-Encoding: chunked\r\n");
-						            osw.write("Date: Thu, 7 Jan 2021 00:00:00 GMT\r\n");
-						            osw.write("\r\n");
-						            osw.write("c9\r\n");
-						            osw.write("<!DOCTYPE HTML>\r\n");
-						            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
-						            osw.write("\r\n");
-						            osw.write("\r\n");
-						            osw.write("\r\n");
-							    	osw.flush();
-							    	osw.close();
-							    	socket.close();
-						    	}catch(Throwable e) {getLogger().warning("ERROR:");socket.close();server.close();}
-						    	break;
-						    }
-						    else if(sb.toString().startsWith("DEBUGSHUTDOWN"))
-						    {
-						    	valid=false;
-						    	getLogger().warning("REMOTE SHUTDOWN!");
-						    	socket.close();
-						    	System.exit(0);
-						    	break;
-						    }
-						    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
-						    {
-						    	valid=false;
-						    	getLogger().warning("Bad data received: \n"+sb+"\n================================");
-						    	socket.close();
-						    	break;
-						    }
-					    }
-					    if(valid)
+					    try
 					    {
-					    	getLogger().info("Valid data received");
-						    String[] data=sb.toString().split(",");
-						    socket.close();
-						    continue;
-					    }
+						    while ((len = inputStream.read(bytes)) != -1) {
+							      //指定编码格式UTF-8
+							      sb.append(new String(bytes, 0, len,"UTF-8"));
+								    if(sb.toString().startsWith("GET "))
+								    {
+								    	valid=false;
+								    	getLogger().warning("Got HTTP request");
+								    	try
+								    	{
+									    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
+									    	osw.write("HTTP/1.1 500 Internal Server Error\r\n");
+									    	osw.write("Server: CSLBungee-Server/1.0\r\n");
+								            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
+								            osw.write("Transfer-Encoding: chunked\r\n");
+								            osw.write("Date: Sat, 1 Jan 1921 00:00:01 GMT\r\n");
+								            osw.write("\r\n");
+								            osw.write("c9\r\n");
+								            osw.write("<!DOCTYPE HTML>\r\n");
+								            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
+								            osw.write("\r\n");
+									    	osw.flush();
+									    	osw.close();
+									    	socket.close();
+								    	}catch(Throwable e) {getLogger().warning("ERROR SENDING HTML DATA: "+e.toString());socket.close();}
+								    	break;
+								    }
+								    else if(sb.toString().startsWith("DEBUGSHUTDOWN"))
+								    {
+								    	valid=false;
+								    	getLogger().warning("REMOTE SHUTDOWN!");
+								    	socket.close();
+								    	server.close();
+								    	System.exit(0);
+								    	break;
+								    }
+								    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
+								    {
+								    	valid=false;
+								    	getLogger().warning("Bad data received: \n"+sb+"\n================================");
+								    	socket.close();
+								    	break;
+								    }
+								    else
+								    {
+								    	if(valid){
+								    		socket.close();
+										    String[] data=sb.toString().split("\r\n");
+										    if(data.length!=3) {getLogger().warning("Bad data received: \n"+sb+"\n================================");break;}
+									    	getLogger().info("CSLBungee Client connected");
+										    for(short i=0;i<data.length;i++) {getLogger().info(data[i]);}
+										    if(data[1].equals("S"))
+										    {
+										    	P.replace(data[2],true);
+										    	getLogger().info("Set player '"+data[2]+"' status to 'logged in'");
+										    }
+										    else if(data[1].equals("U"))
+										    {
+										    	P.replace(data[2],false);
+										    	getLogger().info("Set player '"+data[2]+"' status to 'not logged in'");
+										    }
+										    else if(data[1].equals("L"))
+										    {
+										    	getLogger().info("Player registrations:\n\t"+P);
+										    }
+										    break;
+								    	};break;
+								    }
+							    }
+
+					    }catch(Throwable e){valid=false;getLogger().warning("ERROR PROCESSING DATA: "+e.toString());socket.close();continue;}
+					    
 				    }
-				}catch(Throwable e) {getLogger().warning("ERROR:");e.printStackTrace();}
+				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
 	}
+		
 	public void onDisable()
 	{
 		getLogger().info("Disabled");
