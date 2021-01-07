@@ -19,7 +19,7 @@ public class CSLBSC extends Command {
 			{s.sendMessage(new ComponentBuilder("Hello world!").color(ChatColor.GREEN).create());}
 			else if(args[0].equals("l"))
 			{
-				s.sendMessage(new ComponentBuilder("List of players:\n\t"+CSLBS.P).color(ChatColor.GREEN).create());
+				s.sendMessage(new ComponentBuilder("List of recorded players:\n\t"+CSLBS.P).color(ChatColor.GREEN).create());
 			}
 			else if(args[0].toLowerCase().equals("s")&&args.length==2)
 			{

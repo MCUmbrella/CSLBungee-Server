@@ -20,7 +20,7 @@ public class CSLBS extends Plugin
 		try
 		{
 			File file=new File("cmdWhitelist.txt");
-			if(!file.exists()) {file.createNewFile();}
+			if(!file.exists()) {getLogger().warning("Missing command whitelist. Creating one");file.createNewFile();BufferedWriter bw = new BufferedWriter(new FileWriter(file));bw.write("/login"+System.getProperty("line.separator")+"/register"+System.getProperty("line.separator")+"/l"+System.getProperty("line.separator")+"/reg"+System.getProperty("line.separator")+"this_message-canbypass=CSL~Bungee`anytime"+System.getProperty("line.separator")+"/thisCMD");bw.flush();bw.close();}
 			BufferedReader br;
 			br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
 			String str;
@@ -29,7 +29,7 @@ public class CSLBS extends Plugin
 				cmdWhitelist.add(str);
 			}
 			br.close();
-		}catch(Throwable e){getLogger().info("Error reading/creating command whitelist(cmdWhitelist.txt). Using default values");cmdWhitelist.add("/login");cmdWhitelist.add("/register");cmdWhitelist.add("/l");cmdWhitelist.add("/reg");}
+		}catch(Throwable e){getLogger().warning("Error reading/creating command whitelist(cmdWhitelist.txt). Using default values");cmdWhitelist.add("/login");cmdWhitelist.add("/register");cmdWhitelist.add("/l");cmdWhitelist.add("/reg");}
 		getProxy().getPluginManager().registerCommand(this, new CSLBSC("cslbs"));
 		getProxy().getPluginManager().registerListener(this, new CSLBSE());
 		new Thread("CSLBungee Server")
