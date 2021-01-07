@@ -12,10 +12,24 @@ public class CSLBS extends Plugin
 	long round;
 	boolean valid=false;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
+	static HashSet<String> cmdWhitelist = new HashSet<String>();
 	public void onEnable()
 	{
 		CSLBS.main=this;
 		getLogger().info("Enabling.");
+		try
+		{
+			File file=new File("cmdWhitelist.txt");
+			if(!file.exists()) {file.createNewFile();}
+			BufferedReader br;
+			br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
+			String str;
+			while((str = br.readLine()) != null)
+			{
+				cmdWhitelist.add(str);
+			}
+			br.close();
+		}catch(Throwable e){getLogger().info("Error reading/creating command whitelist(cmdWhitelist.txt). Using default values");cmdWhitelist.add("/login");cmdWhitelist.add("/register");cmdWhitelist.add("/l");cmdWhitelist.add("/reg");}
 		getProxy().getPluginManager().registerCommand(this, new CSLBSC("cslbs"));
 		getProxy().getPluginManager().registerListener(this, new CSLBSE());
 		new Thread("CSLBungee Server")
