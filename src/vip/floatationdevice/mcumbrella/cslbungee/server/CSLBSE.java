@@ -15,7 +15,8 @@ public class CSLBSE implements Listener
 		//CSLBS.main.getLogger().info(e.getSender().toString()+": "+e.getMessage());
 		if(!CSLBS.P.get(e.getSender().toString()))
 		{
-			if(!CSLBS.cmdWhitelist.contains(e.getMessage()))
+			String[] cmd=e.getMessage().split(" ");
+			if(!CSLBS.cmdWhitelist.contains(cmd[0]))
 			{
 				e.setCancelled(true);
 			}
