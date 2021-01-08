@@ -119,7 +119,7 @@ public class CSLBS extends Plugin
 										    String[] data=sb.toString().split("\r\n");
 										    if(data.length!=3) {getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");break;}
 									    	getLogger().info("CSLBungee Client connected");
-										    for(short i=0;i<data.length;i++) {getLogger().info(data[i]);}
+										    //for(short i=0;i<data.length;i++) {getLogger().info(data[i]);} DEBUG
 										    if(data[1].equals("S"))
 										    {
 										    	P.replace(data[2],true);
