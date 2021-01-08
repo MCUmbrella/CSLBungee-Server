@@ -43,15 +43,15 @@ public class CSLBS extends Plugin
 				    for(;;)
 				    {
 				    	round++;
-				    	//getLogger().info("Round "+round); DEBUG
+				    	getLogger().info("Round "+round);
 				    	Socket socket = server.accept();
-				    	//getLogger().info("Incoming connection"); DEBUG
+				    	getLogger().info("Receiving data");
 				    	valid=true;
 				    	Thread t=new Thread("CSLBungee-Server Connection Timer")
 				    	{
 				    		public void run()
 				    		{
-				    			//getLogger().info("Timer started"); DEBUG
+				    			//getLogger().info("Timer started");
 				    			try {
 									Thread.sleep(1000);
 									socket.close();
@@ -70,11 +70,12 @@ public class CSLBS extends Plugin
 					    try
 					    {
 						    while ((len = inputStream.read(bytes)) != -1) {
+							      //指定编码格式UTF-8
 							      sb.append(new String(bytes, 0, len,"UTF-8"));
 								    if(sb.toString().startsWith("GET "))
 								    {
 								    	valid=false;
-								    	//getLogger().warning("Got HTTP request"); DEBUG
+								    	getLogger().warning("Got HTTP request");
 								    	try
 								    	{
 									    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
@@ -91,10 +92,9 @@ public class CSLBS extends Plugin
 									    	osw.flush();
 									    	osw.close();
 									    	socket.close();
-								    	}catch(Throwable e) { /*getLogger().warning("ERROR SENDING HTML DATA: "+e.toString());  DEBUG*/ socket.close();}
+								    	}catch(Throwable e) {getLogger().warning("ERROR SENDING HTML DATA: "+e.toString());socket.close();}
 								    	break;
 								    }
-								    /* DEBUG
 								    else if(sb.toString().startsWith("DEBUGSHUTDOWN"))
 								    {
 								    	valid=false;
@@ -104,11 +104,10 @@ public class CSLBS extends Plugin
 								    	System.exit(0);
 								    	break;
 								    }
-								    */
 								    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 								    {
 								    	valid=false;
-								    	//getLogger().warning("Bad data received: \n"+sb+"\n================================"); DEBUG
+								    	getLogger().warning("Bad data received: \n"+sb+"\n================================");
 								    	socket.close();
 								    	break;
 								    }
@@ -117,9 +116,9 @@ public class CSLBS extends Plugin
 								    	if(valid){
 								    		socket.close();
 										    String[] data=sb.toString().split("\r\n");
-										    if(data.length!=3) {getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");break;}
+										    if(data.length!=3) {getLogger().warning("Bad data received: \n"+sb+"\n================================");break;}
 									    	getLogger().info("CSLBungee Client connected");
-										    //for(short i=0;i<data.length;i++) {getLogger().info(data[i]);} DEBUG
+										    for(short i=0;i<data.length;i++) {getLogger().info(data[i]);}
 										    if(data[1].equals("S"))
 										    {
 										    	P.replace(data[2],true);
@@ -130,25 +129,19 @@ public class CSLBS extends Plugin
 										    	P.replace(data[2],false);
 										    	getLogger().info("Set player '"+data[2]+"' status to 'not logged in'");
 										    }
-										    else
-										    {
-										    	getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");
-										    }
-										    /* DEBUG
 										    else if(data[1].equals("L"))
 										    {
 										    	getLogger().info("Player registrations:\n\t"+P);
 										    }
-										    */
 										    break;
 								    	};break;
 								    }
 							    }
 
-					    }catch(Throwable e){valid=false; /*getLogger().warning("ERROR PROCESSING DATA: "+e.toString());*/ socket.close();continue;}
+					    }catch(Throwable e){valid=false;getLogger().warning("ERROR PROCESSING DATA: "+e.toString());socket.close();continue;}
 					    
 				    }
-				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR(Round="+round+"):");e.printStackTrace();System.exit(-1);}
+				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
