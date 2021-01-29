@@ -19,17 +19,46 @@ public class CSLBS extends Plugin
 		getLogger().info("Enabling.");
 		try
 		{
-			File file=new File("cmdWhitelist.txt");
-			if(!file.exists()) {getLogger().warning("Missing command whitelist. Creating one");file.createNewFile();BufferedWriter bw = new BufferedWriter(new FileWriter(file));bw.write("/login"+System.getProperty("line.separator")+"/register"+System.getProperty("line.separator")+"/l"+System.getProperty("line.separator")+"/reg"+System.getProperty("line.separator")+"this_message-canbypass=CSL~Bungee`anytime"+System.getProperty("line.separator")+"/thisCMD");bw.flush();bw.close();}
-			BufferedReader br;
-			br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
+			File file=new File(this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt");
+			if(!file.exists())
+			{
+				getLogger().warning("Missing command whitelist. Creating one");
+				new File(this.getDataFolder().toPath().toString()).mkdir();
+				file.createNewFile();
+				BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+				bw.write("/login"+System.getProperty("line.separator")
+					+"/register"+System.getProperty("line.separator")
+					+"/l"+System.getProperty("line.separator")
+					+"/reg"+System.getProperty("line.separator")
+					+"/bindemail"+System.getProperty("line.separator")
+					+"/bindmail"+System.getProperty("line.separator")
+					+"/resetpassword"+System.getProperty("line.separator")
+					+"/repw"+System.getProperty("line.separator")
+					+"this_message-canbypass=CSL~Bungee`anytime"+System.getProperty("line.separator")
+					+"/thisCMD"+System.getProperty("line.separator")
+				);
+				bw.flush();
+				bw.close();
+			}
+			BufferedReader br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
 			String str;
 			while((str = br.readLine()) != null)
 			{
 				cmdWhitelist.add(str);
 			}
 			br.close();
-		}catch(Throwable e){getLogger().warning("Error reading/creating command whitelist(cmdWhitelist.txt). Using default values");cmdWhitelist.add("/login");cmdWhitelist.add("/register");cmdWhitelist.add("/l");cmdWhitelist.add("/reg");}
+		}catch(Throwable e)
+		{
+			getLogger().warning("Error reading/creating command whitelist("+this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt"+"). Using default values. ("+e.toString()+")");
+			cmdWhitelist.add("/login");
+			cmdWhitelist.add("/register");
+			cmdWhitelist.add("/l");
+			cmdWhitelist.add("/reg");
+			cmdWhitelist.add("/bindemail");
+			cmdWhitelist.add("/bdmail");
+			cmdWhitelist.add("/resetpassword");
+			cmdWhitelist.add("/repw");
+		}
 		getProxy().getPluginManager().registerCommand(this, new CSLBSC("cslbs"));
 		getProxy().getPluginManager().registerListener(this, new CSLBSE());
 		new Thread("CSLBungee Server")
@@ -37,6 +66,7 @@ public class CSLBS extends Plugin
 			public void run()
 			{
 				try{
+					@SuppressWarnings("resource")
 					ServerSocket server = new ServerSocket(port);
 					getLogger().info("CSLBungee server started.");
 					System.out.println("CSLBungee server listening on port:"+port);
@@ -74,11 +104,10 @@ public class CSLBS extends Plugin
 								    if(sb.toString().startsWith("GET "))
 								    {
 								    	valid=false;
-								    	//getLogger().warning("Got HTTP request"); DEBUG
 								    	try
 								    	{
 									    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
-									    	osw.write("HTTP/1.1 500 Internal Server Error\r\n");
+									    	osw.write("HTTP/1.1 400 Bad Request\r\n");
 									    	osw.write("Server: CSLBungee-Server/1.0\r\n");
 								            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
 								            osw.write("Transfer-Encoding: chunked\r\n");
@@ -87,24 +116,12 @@ public class CSLBS extends Plugin
 								            osw.write("c9\r\n");
 								            osw.write("<!DOCTYPE HTML>\r\n");
 								            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
-								            osw.write("\r\n");
 									    	osw.flush();
 									    	osw.close();
 									    	socket.close();
-								    	}catch(Throwable e) { /*getLogger().warning("ERROR SENDING HTML DATA: "+e.toString());  DEBUG*/ socket.close();}
+								    	}catch(Throwable e) {socket.close();}
 								    	break;
 								    }
-								    /* DEBUG
-								    else if(sb.toString().startsWith("DEBUGSHUTDOWN"))
-								    {
-								    	valid=false;
-								    	getLogger().warning("REMOTE SHUTDOWN!");
-								    	socket.close();
-								    	server.close();
-								    	System.exit(0);
-								    	break;
-								    }
-								    */
 								    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 								    {
 								    	valid=false;
@@ -119,7 +136,6 @@ public class CSLBS extends Plugin
 										    String[] data=sb.toString().split("\r\n");
 										    if(data.length!=3) {getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");break;}
 									    	getLogger().info("CSLBungee Client connected");
-										    //for(short i=0;i<data.length;i++) {getLogger().info(data[i]);} DEBUG
 										    if(data[1].equals("S"))
 										    {
 										    	P.replace(data[2],true);
@@ -134,12 +150,6 @@ public class CSLBS extends Plugin
 										    {
 										    	getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");
 										    }
-										    /* DEBUG
-										    else if(data[1].equals("L"))
-										    {
-										    	getLogger().info("Player registrations:\n\t"+P);
-										    }
-										    */
 										    break;
 								    	};break;
 								    }
