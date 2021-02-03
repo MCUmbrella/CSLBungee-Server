@@ -83,10 +83,6 @@ public class CSLBS extends Plugin
 				    			long thisRound=++round;
 				    			getLogger().info("Round "+thisRound);
 				    			
-				    			/* Timer: used to detect if a round took too many time to process.
-				    			 * Doesn't work as expected.
-				    			 * Fortunately it doesn't seem to have much impact on this version of CSLBungee Server.
-				    			 * Expected: Skip a round which took more than 1s to process.
 				    			new Thread("CSLBungee-Server Connection Timer")
 						    	{
 						    		public void run()
@@ -94,13 +90,12 @@ public class CSLBS extends Plugin
 						    			//getLogger().info("Timer started"); DEBUG
 						    			try {
 											Thread.sleep(1000);
-											if(!dataValid) {socket.close();getLogger().warning("Round "+thisRound+" took more 1s to process. Skipping");}
+											socket.close();
 										} catch (Throwable e) {
 											e.printStackTrace();
 										}
 						    		}
 						    	}.start();
-				    			*/
 				    			
 				    			InputStream inputStream = null;
 								try {
