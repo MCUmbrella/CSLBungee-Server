@@ -158,7 +158,7 @@ public class CSLBS extends Plugin
 										    		socket.close();
 												    String[] data=sb.toString().split("\r\n");
 												    if(data.length!=3) {getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");break;}
-											    	getLogger().info("CSLBungee Client connected");
+											    	//getLogger().info("CSLBungee Client connected"); DEBUG
 												    if(data[1].equals("S"))
 												    {
 												    	P.replace(data[2],true);
