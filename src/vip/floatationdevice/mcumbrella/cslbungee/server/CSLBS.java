@@ -9,7 +9,7 @@ public class CSLBS extends Plugin
 {
 	int port=14514;
 	public static CSLBS main;
-	long round;
+	long round=0;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
 	static HashSet<String> cmdWhitelist = new HashSet<String>();
 	public void onEnable()
@@ -78,23 +78,30 @@ public class CSLBS extends Plugin
 				    	new Thread("CSLBungee-Server Connection Processor")
 				    	{
 				    		boolean dataValid=true;
-				    		public void run() 
+				    		public void run()
 				    		{
-				    			/*new Thread("CSLBungee-Server Connection Timer")
+				    			long thisRound=++round;
+				    			getLogger().info("Round "+thisRound);
+				    			
+				    			/* Timer: used to detect if a round took too many time to process.
+				    			 * Doesn't work as expected.
+				    			 * Fortunately it doesn't seem to have much impact on this version of CSLBungee Server.
+				    			 * Expected: Skip a round which took more than 1s to process.
+				    			new Thread("CSLBungee-Server Connection Timer")
 						    	{
 						    		public void run()
 						    		{
 						    			//getLogger().info("Timer started"); DEBUG
 						    			try {
 											Thread.sleep(1000);
-											socket.close();
-											valid=false;
+											if(!dataValid) {socket.close();getLogger().warning("Round "+thisRound+" took more 1s to process. Skipping");}
 										} catch (Throwable e) {
 											e.printStackTrace();
 										}
 						    		}
-						    	}.start();*/
-				    			;
+						    	}.start();
+				    			*/
+				    			
 				    			InputStream inputStream = null;
 								try {
 									inputStream = socket.getInputStream();
@@ -123,7 +130,7 @@ public class CSLBS extends Plugin
 										            osw.write("\r\n");
 										            osw.write("c9\r\n");
 										            osw.write("<!DOCTYPE HTML>\r\n");
-										            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
+										            osw.write("<html><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+new java.util.Date()+"</center></body></html>\r\n");
 											    	osw.flush();
 											    	osw.close();
 											    	socket.close();
@@ -163,6 +170,7 @@ public class CSLBS extends Plugin
 									    }
 
 							    }catch(Throwable e) {}
+							    getLogger().info("Round "+thisRound+" end");
 				    		}
 				    	}.start();
 				    					    
