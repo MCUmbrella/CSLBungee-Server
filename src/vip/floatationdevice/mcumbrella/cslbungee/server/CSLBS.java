@@ -4,6 +4,7 @@ import net.md_5.bungee.api.plugin.*;
 import net.md_5.bungee.api.ProxyServer; //TODO: a regular way to stop BungeeCord on CSLBungee Server thread error
 
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
 @SuppressWarnings("unused")
@@ -109,6 +110,7 @@ public class CSLBS extends Plugin
 								try {
 									inputStream = socket.getInputStream();
 								} catch (Throwable e) {
+									dataValid=false;
 									getLogger().warning("Error initializing round "+thisRound+":");
 									e.printStackTrace();
 								}
@@ -124,16 +126,19 @@ public class CSLBS extends Plugin
 										    	dataValid=false;
 										    	try
 										    	{
+										    		SimpleDateFormat sdf=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+										    		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+										    		String httpdate=sdf.format(new Date());
 											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
 											    	osw.write("HTTP/1.1 400 Bad Request\r\n");
 											    	osw.write("Server: CSLBungee-Server/1.2\r\n");
 										            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
 										            osw.write("Transfer-Encoding: chunked\r\n");
-										            osw.write("Date: Sat, 1 Jan 1921 00:00:01 GMT\r\n");
+										            osw.write("Date: "+httpdate+"\r\n");
 										            osw.write("\r\n");
 										            osw.write("c9\r\n");
 										            osw.write("<!DOCTYPE HTML>\r\n");
-										            osw.write("<html><head><title>"+thisRound+"</title></head><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+new java.util.Date()+"</center></body></html>\r\n");
+										            osw.write("<html><head><title>"+thisRound+"</title></head><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+httpdate+"</center></body></html>\r\n");
 											    	osw.flush();
 											    	osw.close();
 											    	socket.close();
@@ -142,6 +147,7 @@ public class CSLBS extends Plugin
 										    }
 										    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 										    {
+										    	dataValid=false;
 										    	//getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================"); DEBUG
 										    	socket.close();
 										    	break;
