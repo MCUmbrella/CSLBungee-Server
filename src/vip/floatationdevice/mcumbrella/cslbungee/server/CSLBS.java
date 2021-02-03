@@ -1,10 +1,13 @@
 package vip.floatationdevice.mcumbrella.cslbungee.server;
 
 import net.md_5.bungee.api.plugin.*;
+import net.md_5.bungee.api.ProxyServer; //TODO: a regular way to stop BungeeCord on CSLBungee Server thread error
 
 import java.net.*;
 import java.io.*;
 import java.util.*;
+@SuppressWarnings("unused")
+
 public class CSLBS extends Plugin
 {
 	int port=14514;
@@ -80,8 +83,8 @@ public class CSLBS extends Plugin
 				    		boolean dataValid=true;
 				    		public void run()
 				    		{
-				    			long thisRound=++round;
-				    			getLogger().info("Round "+thisRound);
+				    			long thisRound=++round; //used for debug and counting rounds
+				    			//getLogger().info("Round "+thisRound); DEBUG
 				    			
 				    			/* Timer: used to detect if a round took too many time to process.
 				    			 * Doesn't work as expected.
@@ -105,9 +108,9 @@ public class CSLBS extends Plugin
 				    			InputStream inputStream = null;
 								try {
 									inputStream = socket.getInputStream();
-								} catch (IOException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
+								} catch (Throwable e) {
+									getLogger().warning("Error initializing round "+thisRound+":");
+									e.printStackTrace();
 								}
 							    byte[] bytes = new byte[64];
 							    int len;
@@ -130,7 +133,7 @@ public class CSLBS extends Plugin
 										            osw.write("\r\n");
 										            osw.write("c9\r\n");
 										            osw.write("<!DOCTYPE HTML>\r\n");
-										            osw.write("<html><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+new java.util.Date()+"</center></body></html>\r\n");
+										            osw.write("<html><head><title>"+thisRound+"</title></head><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+new java.util.Date()+"</center></body></html>\r\n");
 											    	osw.flush();
 											    	osw.close();
 											    	socket.close();
@@ -148,7 +151,7 @@ public class CSLBS extends Plugin
 										    	if(dataValid){
 										    		socket.close();
 												    String[] data=sb.toString().split("\r\n");
-												    if(data.length!=3) {getLogger().warning("Bad data received:\n"+sb+"\n================================");break;}
+												    if(data.length!=3) {getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");break;}
 											    	getLogger().info("CSLBungee Client connected");
 												    if(data[1].equals("S"))
 												    {
@@ -162,7 +165,7 @@ public class CSLBS extends Plugin
 												    }
 												    else
 												    {
-												    	getLogger().warning("Bad data received:\n"+sb+"\n================================");
+												    	getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");
 												    }
 												    break;
 										    	};break;
@@ -170,12 +173,12 @@ public class CSLBS extends Plugin
 									    }
 
 							    }catch(Throwable e) {}
-							    getLogger().info("Round "+thisRound+" end");
+							    //getLogger().info("Round "+thisRound+" end"); DEBUG
 				    		}
 				    	}.start();
 				    					    
 				    }
-				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);}
+				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);} //TODO: a regular way to stop BungeeCord
 			}
 		}.start();
 		getLogger().info("Enabled.");
