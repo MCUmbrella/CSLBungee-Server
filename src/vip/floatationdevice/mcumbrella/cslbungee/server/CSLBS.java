@@ -42,7 +42,7 @@ public class CSLBS extends Plugin
 				bw.flush();
 				bw.close();
 			}
-			BufferedReader br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(file));
 			String str;
 			while((str = br.readLine()) != null)
 			{
@@ -74,7 +74,7 @@ public class CSLBS extends Plugin
 					System.out.println("CSLBungee server listening on port:"+port);
 				    for(;;)
 				    {
-				    	//getLogger().info("Round "+round); DEBUG
+				    	//getLogger().info("Round^ "+round); DEBUG
 				    	Socket socket = server.accept();
 				    	
 				    	
@@ -142,7 +142,7 @@ public class CSLBS extends Plugin
 										    }
 										    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 										    {
-										    	//getLogger().warning("Bad data received: \n"+sb+"\n================================"); DEBUG
+										    	//getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================"); DEBUG
 										    	socket.close();
 										    	break;
 										    }
