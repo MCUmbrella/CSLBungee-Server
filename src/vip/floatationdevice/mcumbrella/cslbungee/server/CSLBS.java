@@ -10,7 +10,6 @@ public class CSLBS extends Plugin
 	int port=14514;
 	public static CSLBS main;
 	long round;
-	boolean valid=false;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
 	static HashSet<String> cmdWhitelist = new HashSet<String>();
 	public void onEnable()
@@ -96,7 +95,13 @@ public class CSLBS extends Plugin
 						    		}
 						    	}.start();*/
 				    			;
-				    			InputStream inputStream = socket.getInputStream();
+				    			InputStream inputStream = null;
+								try {
+									inputStream = socket.getInputStream();
+								} catch (IOException e1) {
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+								}
 							    byte[] bytes = new byte[64];
 							    int len;
 							    StringBuilder sb = new StringBuilder();
@@ -106,7 +111,7 @@ public class CSLBS extends Plugin
 									      sb.append(new String(bytes, 0, len,"UTF-8"));
 										    if(sb.toString().startsWith("GET "))
 										    {
-										    	valid=false;
+										    	dataValid=false;
 										    	try
 										    	{
 											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
@@ -127,14 +132,13 @@ public class CSLBS extends Plugin
 										    }
 										    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 										    {
-										    	valid=false;
 										    	//getLogger().warning("Bad data received: \n"+sb+"\n================================"); DEBUG
 										    	socket.close();
 										    	break;
 										    }
 										    else
 										    {
-										    	if(valid){
+										    	if(dataValid){
 										    		socket.close();
 												    String[] data=sb.toString().split("\r\n");
 												    if(data.length!=3) {getLogger().warning("Bad data received:\n"+sb+"\n================================");break;}
@@ -161,90 +165,7 @@ public class CSLBS extends Plugin
 							    }catch(Throwable e) {}
 				    		}
 				    	}.start();
-				    	
-				    	
-				    	//getLogger().info("Incoming connection"); DEBUG
-				    	valid=true;
-				    	Thread t=new Thread("CSLBungee-Server Connection Timer")
-				    	{
-				    		public void run()
-				    		{
-				    			//getLogger().info("Timer started"); DEBUG
-				    			try {
-									Thread.sleep(1000);
-									socket.close();
-									valid=false;
-								} catch (Throwable e) {
-									e.printStackTrace();
-								}
-				    		}
-				    	};
-				    	t.start();
-
-					    InputStream inputStream = socket.getInputStream();
-					    byte[] bytes = new byte[64];
-					    int len;
-					    StringBuilder sb = new StringBuilder();
-					    try
-					    {
-						    while ((len = inputStream.read(bytes)) != -1) {
-							      sb.append(new String(bytes, 0, len,"UTF-8"));
-								    if(sb.toString().startsWith("GET "))
-								    {
-								    	valid=false;
-								    	try
-								    	{
-									    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
-									    	osw.write("HTTP/1.1 400 Bad Request\r\n");
-									    	osw.write("Server: CSLBungee-Server/1.0\r\n");
-								            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
-								            osw.write("Transfer-Encoding: chunked\r\n");
-								            osw.write("Date: Sat, 1 Jan 1921 00:00:01 GMT\r\n");
-								            osw.write("\r\n");
-								            osw.write("c9\r\n");
-								            osw.write("<!DOCTYPE HTML>\r\n");
-								            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
-									    	osw.flush();
-									    	osw.close();
-									    	socket.close();
-								    	}catch(Throwable e) {socket.close();}
-								    	break;
-								    }
-								    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
-								    {
-								    	valid=false;
-								    	//getLogger().warning("Bad data received: \n"+sb+"\n================================"); DEBUG
-								    	socket.close();
-								    	break;
-								    }
-								    else
-								    {
-								    	if(valid){
-								    		socket.close();
-										    String[] data=sb.toString().split("\r\n");
-										    if(data.length!=3) {getLogger().warning("Bad data received:\n"+sb+"\n================================");break;}
-									    	getLogger().info("CSLBungee Client connected");
-										    if(data[1].equals("S"))
-										    {
-										    	P.replace(data[2],true);
-										    	getLogger().info("Set player '"+data[2]+"' status to 'logged in'");
-										    }
-										    else if(data[1].equals("U"))
-										    {
-										    	P.replace(data[2],false);
-										    	getLogger().info("Set player '"+data[2]+"' status to 'not logged in'");
-										    }
-										    else
-										    {
-										    	getLogger().warning("Bad data received:\n"+sb+"\n================================");
-										    }
-										    break;
-								    	};break;
-								    }
-							    }
-
-					    }catch(Throwable e){valid=false; /*getLogger().warning("ERROR PROCESSING DATA: "+e.toString());*/ socket.close();continue;}
-					    
+				    					    
 				    }
 				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);}
 			}
