@@ -126,7 +126,7 @@ public class CSLBS extends Plugin
 										    	{
 											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
 											    	osw.write("HTTP/1.1 400 Bad Request\r\n");
-											    	osw.write("Server: CSLBungee-Server/1.0\r\n");
+											    	osw.write("Server: CSLBungee-Server/1.2\r\n");
 										            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
 										            osw.write("Transfer-Encoding: chunked\r\n");
 										            osw.write("Date: Sat, 1 Jan 1921 00:00:01 GMT\r\n");
