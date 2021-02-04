@@ -51,7 +51,7 @@ public class CSLBS extends Plugin
 			br.close();
 		}catch(Throwable e)
 		{
-			getLogger().warning("Error reading/creating command whitelist("+this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt"+"). Using default values. ("+e.toString()+")");
+			getLogger().severe("Error reading/creating command whitelist("+this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt"+"). Using default values. ("+e.toString()+")");
 			cmdWhitelist.add("/login");
 			cmdWhitelist.add("/register");
 			cmdWhitelist.add("/l");
@@ -110,7 +110,7 @@ public class CSLBS extends Plugin
 									inputStream = socket.getInputStream();
 								} catch (Throwable e) {
 									dataValid=false;
-									getLogger().warning("Error initializing round "+thisRound+":");
+									getLogger().severe("Error initializing round "+thisRound+":");
 									e.printStackTrace();
 								}
 							    byte[] bytes = new byte[64];
@@ -183,7 +183,7 @@ public class CSLBS extends Plugin
 				    	}.start();
 				    					    
 				    }
-				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");System.exit(-1);}
+				}catch(Throwable e) {getLogger().severe("CSLBungee SERVER ERROR (round="+round+"):");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");System.exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
