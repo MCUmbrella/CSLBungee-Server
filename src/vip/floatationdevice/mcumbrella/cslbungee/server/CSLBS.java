@@ -1,16 +1,18 @@
 package vip.floatationdevice.mcumbrella.cslbungee.server;
 
 import net.md_5.bungee.api.plugin.*;
+import net.md_5.bungee.BungeeCord;
 
 import java.net.*;
+import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
+
 public class CSLBS extends Plugin
 {
 	int port=14514;
 	public static CSLBS main;
-	long round;
-	boolean valid=false;
+	long round=0;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
 	static HashSet<String> cmdWhitelist = new HashSet<String>();
 	public void onEnable()
@@ -40,7 +42,7 @@ public class CSLBS extends Plugin
 				bw.flush();
 				bw.close();
 			}
-			BufferedReader br = new BufferedReader(new FileReader("cmdWhitelist.txt"));
+			BufferedReader br = new BufferedReader(new FileReader(file));
 			String str;
 			while((str = br.readLine()) != null)
 			{
@@ -49,7 +51,7 @@ public class CSLBS extends Plugin
 			br.close();
 		}catch(Throwable e)
 		{
-			getLogger().warning("Error reading/creating command whitelist("+this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt"+"). Using default values. ("+e.toString()+")");
+			getLogger().severe("Error reading/creating command whitelist("+this.getDataFolder().toPath()+File.separator+"cmdWhitelist.txt"+"). Using default values. ("+e.toString()+")");
 			cmdWhitelist.add("/login");
 			cmdWhitelist.add("/register");
 			cmdWhitelist.add("/l");
@@ -72,93 +74,116 @@ public class CSLBS extends Plugin
 					System.out.println("CSLBungee server listening on port:"+port);
 				    for(;;)
 				    {
-				    	round++;
-				    	//getLogger().info("Round "+round); DEBUG
+				    	//getLogger().info("Round^ "+round); DEBUG
 				    	Socket socket = server.accept();
-				    	//getLogger().info("Incoming connection"); DEBUG
-				    	valid=true;
-				    	Thread t=new Thread("CSLBungee-Server Connection Timer")
+				    	
+				    	
+				    	new Thread("CSLBungee-Server Connection Processor")
 				    	{
+				    		boolean dataValid=true;
 				    		public void run()
 				    		{
-				    			//getLogger().info("Timer started"); DEBUG
-				    			try {
-									Thread.sleep(1000);
-									socket.close();
-									valid=false;
+				    			long thisRound=++round; //used for debug and counting rounds
+				    			//getLogger().info("Round "+thisRound); DEBUG
+				    			
+				    			/* Timer: used to detect if a round took too many time to process.
+				    			 * Doesn't work as expected.
+				    			 * Fortunately it doesn't seem to have much impact on this version of CSLBungee Server.
+				    			 * Expected: Skip a round which took more than 1s to process.
+				    			new Thread("CSLBungee-Server Connection Timer")
+						    	{
+						    		public void run()
+						    		{
+						    			//getLogger().info("Timer started"); DEBUG
+						    			try {
+											Thread.sleep(1000);
+											if(!dataValid) {socket.close();getLogger().warning("Round "+thisRound+" took more 1s to process. Skipping");}
+										} catch (Throwable e) {
+											e.printStackTrace();
+										}
+						    		}
+						    	}.start();
+				    			*/
+				    			
+				    			InputStream inputStream = null;
+								try {
+									inputStream = socket.getInputStream();
 								} catch (Throwable e) {
+									dataValid=false;
+									getLogger().severe("Error initializing round "+thisRound+":");
 									e.printStackTrace();
 								}
-				    		}
-				    	};
-				    	t.start();
-
-					    InputStream inputStream = socket.getInputStream();
-					    byte[] bytes = new byte[64];
-					    int len;
-					    StringBuilder sb = new StringBuilder();
-					    try
-					    {
-						    while ((len = inputStream.read(bytes)) != -1) {
-							      sb.append(new String(bytes, 0, len,"UTF-8"));
-								    if(sb.toString().startsWith("GET "))
-								    {
-								    	valid=false;
-								    	try
-								    	{
-									    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
-									    	osw.write("HTTP/1.1 400 Bad Request\r\n");
-									    	osw.write("Server: CSLBungee-Server/1.0\r\n");
-								            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
-								            osw.write("Transfer-Encoding: chunked\r\n");
-								            osw.write("Date: Sat, 1 Jan 1921 00:00:01 GMT\r\n");
-								            osw.write("\r\n");
-								            osw.write("c9\r\n");
-								            osw.write("<!DOCTYPE HTML>\r\n");
-								            osw.write("<html><body><center><h1>HTTP REQUEST NOT ALLOWED</h1><hr>CSLBungee-Server Version 1.0</center></body></html>\r\n");
-									    	osw.flush();
-									    	osw.close();
-									    	socket.close();
-								    	}catch(Throwable e) {socket.close();}
-								    	break;
-								    }
-								    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
-								    {
-								    	valid=false;
-								    	//getLogger().warning("Bad data received: \n"+sb+"\n================================"); DEBUG
-								    	socket.close();
-								    	break;
-								    }
-								    else
-								    {
-								    	if(valid){
-								    		socket.close();
-										    String[] data=sb.toString().split("\r\n");
-										    if(data.length!=3) {getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");break;}
-									    	getLogger().info("CSLBungee Client connected");
-										    if(data[1].equals("S"))
+							    byte[] bytes = new byte[64];
+							    int len;
+							    StringBuilder sb = new StringBuilder();
+							    try
+							    {
+								    while ((len = inputStream.read(bytes)) != -1) {
+									      sb.append(new String(bytes, 0, len,"UTF-8"));
+										    if(sb.toString().startsWith("GET "))
 										    {
-										    	P.replace(data[2],true);
-										    	getLogger().info("Set player '"+data[2]+"' status to 'logged in'");
+										    	dataValid=false;
+										    	try
+										    	{
+										    		SimpleDateFormat sdf=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
+										    		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+										    		String httpdate=sdf.format(new Date());
+											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
+											    	osw.write("HTTP/1.1 400 Bad Request\r\n");
+											    	osw.write("Server: CSLBungee-Server/1.2\r\n");
+										            osw.write("Content-Type: text/html;charset=UTF-8\r\n");
+										            osw.write("Transfer-Encoding: chunked\r\n");
+										            osw.write("Date: "+httpdate+"\r\n");
+										            osw.write("\r\n");
+										            osw.write("c9\r\n");
+										            osw.write("<!DOCTYPE HTML>\r\n");
+										            osw.write("<html><head><title>"+thisRound+"</title></head><body><center><h1>CSLBungee Server V1.2 Running</h1><hr>"+httpdate+"</center></body></html>\r\n");
+											    	osw.flush();
+											    	osw.close();
+											    	socket.close();
+										    	}catch(Throwable e) {socket.close();}
+										    	break;
 										    }
-										    else if(data[1].equals("U"))
+										    else if(!sb.toString().startsWith("CSLBungee-Client-1.0"))
 										    {
-										    	P.replace(data[2],false);
-										    	getLogger().info("Set player '"+data[2]+"' status to 'not logged in'");
+										    	dataValid=false;
+										    	//getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================"); DEBUG
+										    	socket.close();
+										    	break;
 										    }
 										    else
 										    {
-										    	getLogger().warning("Bad data received(Round="+round+"):\n"+sb+"\n================================");
+										    	if(dataValid){
+										    		socket.close();
+												    String[] data=sb.toString().split("\r\n");
+												    if(data.length!=3) {getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");break;}
+											    	//getLogger().info("CSLBungee Client connected"); DEBUG
+												    if(data[1].equals("S"))
+												    {
+												    	P.replace(data[2],true);
+												    	getLogger().info("Set player '"+data[2]+"' status to 'logged in'");
+												    }
+												    else if(data[1].equals("U"))
+												    {
+												    	P.replace(data[2],false);
+												    	getLogger().info("Set player '"+data[2]+"' status to 'not logged in'");
+												    }
+												    else
+												    {
+												    	getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");
+												    }
+												    break;
+										    	};break;
 										    }
-										    break;
-								    	};break;
-								    }
-							    }
+									    }
 
-					    }catch(Throwable e){valid=false; /*getLogger().warning("ERROR PROCESSING DATA: "+e.toString());*/ socket.close();continue;}
-					    
+							    }catch(Throwable e) {}
+							    //getLogger().info("Round "+thisRound+" end"); DEBUG
+				    		}
+				    	}.start();
+				    					    
 				    }
-				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR(Round="+round+"):");e.printStackTrace();System.exit(-1);}
+				}catch(Throwable e) {getLogger().severe("CSLBungee SERVER ERROR (round="+round+"):");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");System.exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
