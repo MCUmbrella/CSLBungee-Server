@@ -1,13 +1,12 @@
 package vip.floatationdevice.mcumbrella.cslbungee.server;
 
 import net.md_5.bungee.api.plugin.*;
-import net.md_5.bungee.api.ProxyServer; //TODO: a regular way to stop BungeeCord on CSLBungee Server thread error
+import net.md_5.bungee.BungeeCord;
 
 import java.net.*;
 import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
-@SuppressWarnings("unused")
 
 public class CSLBS extends Plugin
 {
@@ -184,7 +183,7 @@ public class CSLBS extends Plugin
 				    	}.start();
 				    					    
 				    }
-				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();System.exit(-1);} //TODO: a regular way to stop BungeeCord
+				}catch(Throwable e) {getLogger().warning("CSLBungee SERVER ERROR:");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");System.exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
