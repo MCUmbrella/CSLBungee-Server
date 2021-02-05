@@ -4,6 +4,7 @@ import net.md_5.bungee.api.plugin.*;
 import net.md_5.bungee.BungeeCord;
 
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
@@ -119,7 +120,7 @@ public class CSLBS extends Plugin
 							    try
 							    {
 								    while ((len = inputStream.read(bytes)) != -1) {
-									      sb.append(new String(bytes, 0, len,"UTF-8"));
+									      sb.append(new String(bytes, 0, len, StandardCharsets.UTF_8));
 										    if(sb.toString().startsWith("GET "))
 										    {
 										    	dataValid=false;
@@ -128,7 +129,7 @@ public class CSLBS extends Plugin
 										    		SimpleDateFormat sdf=new SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss z", Locale.US);
 										    		sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
 										    		String httpdate=sdf.format(new Date());
-											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(),"utf-8");
+											    	OutputStreamWriter osw = new OutputStreamWriter(socket.getOutputStream(), StandardCharsets.UTF_8);
 											    	osw.write("HTTP/1.1 400 Bad Request\r\n");
 											    	osw.write("Server: CSLBungee-Server/1.2\r\n");
 										            osw.write("Content-Type: text/html;charset=UTF-8\r\n");

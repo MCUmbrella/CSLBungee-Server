@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <libelement value="jar://E:/$DOWNLOADS/CatSeedLogin-1.2.6-SNAPSHOT.jar!/" />
+    <libelement value="jar://$USER_HOME$/Desktop/Programming/Mohist-4503847-server.jar!/" />
+    <libelement value="jar://E:/$DOWNLOADS/travertine/Travertine.jar!/" />
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/src" expected_position="0" />
+    </src_description>
+  </component>
+  <component name="FacetManager">
+    <facet type="minecraft" name="Minecraft">
+      <configuration>
+        <autoDetectTypes>
+          <platformType>FORGE</platformType>
+        </autoDetectTypes>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/bin" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+    </content>
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="module-library">
+      <library name="CatSeedLogin-1.2.6-SNAPSHOT.jar">
+        <CLASSES>
+          <root url="jar://E:/$DOWNLOADS/CatSeedLogin-1.2.6-SNAPSHOT.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Mohist-4503847-server.jar">
+        <CLASSES>
+          <root url="jar://$USER_HOME$/Desktop/Programming/Mohist-4503847-server.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="Travertine.jar">
+        <CLASSES>
+          <root url="jar://E:/$DOWNLOADS/travertine/Travertine.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+  </component>
+</module>
