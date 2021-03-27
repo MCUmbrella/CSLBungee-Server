@@ -11,7 +11,7 @@ import java.util.*;
 
 public class CSLBS extends Plugin
 {
-	int port=14514;
+	private final int port=14514;
 	public static CSLBS main;
 	long round=0;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
@@ -86,26 +86,6 @@ public class CSLBS extends Plugin
 				    		{
 				    			long thisRound=++round; //used for debug and counting rounds
 				    			//getLogger().info("Round "+thisRound); DEBUG
-				    			
-				    			/* Timer: used to detect if a round took too many time to process.
-				    			 * Doesn't work as expected.
-				    			 * Fortunately it doesn't seem to have much impact on this version of CSLBungee Server.
-				    			 * Expected: Skip a round which took more than 1s to process.
-				    			new Thread("CSLBungee-Server Connection Timer")
-						    	{
-						    		public void run()
-						    		{
-						    			//getLogger().info("Timer started"); DEBUG
-						    			try {
-											Thread.sleep(1000);
-											if(!dataValid) {socket.close();getLogger().warning("Round "+thisRound+" took more 1s to process. Skipping");}
-										} catch (Throwable e) {
-											e.printStackTrace();
-										}
-						    		}
-						    	}.start();
-				    			*/
-				    			
 				    			InputStream inputStream = null;
 								try {
 									inputStream = socket.getInputStream();
@@ -154,7 +134,8 @@ public class CSLBS extends Plugin
 										    }
 										    else
 										    {
-										    	if(dataValid){
+										    	if(dataValid)
+										    	{
 										    		socket.close();
 												    String[] data=sb.toString().split("\r\n");
 												    if(data.length!=3) {getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");break;}
@@ -174,7 +155,8 @@ public class CSLBS extends Plugin
 												    	getLogger().warning("Round "+thisRound+" bad data received:\n"+sb+"\n================================");
 												    }
 												    break;
-										    	};break;
+										    	}
+										    	break;
 										    }
 									    }
 
@@ -184,7 +166,7 @@ public class CSLBS extends Plugin
 				    	}.start();
 				    					    
 				    }
-				}catch(Throwable e) {getLogger().severe("CSLBungee SERVER ERROR (round="+round+"):");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");System.exit(-1);}
+				}catch(Throwable e) {getLogger().severe("CSLBungee SERVER ERROR (round="+round+"):");e.printStackTrace();BungeeCord.getInstance().stop("CSLBungee Server thread error");Runtime.getRuntime().exit(-1);}
 			}
 		}.start();
 		getLogger().info("Enabled.");
