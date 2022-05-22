@@ -98,7 +98,7 @@ public class CSLBServerMain extends Plugin
                                 StringBuilder sb = new StringBuilder();
                                 try
                                 {
-                                    while((len = inputStream.read(bytes)) != -1)
+                                    if((len = inputStream.read(bytes)) != -1)
                                     {
                                         sb.append(new String(bytes, 0, len, StandardCharsets.UTF_8));
                                         if(sb.toString().startsWith("CSLBungee-Client-1.0"))
@@ -108,9 +108,8 @@ public class CSLBServerMain extends Plugin
                                             if(data.length != 3)
                                             {
                                                 getLogger().warning("Bad data received:" + sb);
-                                                break;
+                                                return;
                                             }
-                                            //getLogger().info("CSLBungee Client connected"); DEBUG
                                             if(data[1].equals("S"))
                                             {
                                                 playerLoginStatusMap.replace(data[2], true);
@@ -121,17 +120,9 @@ public class CSLBServerMain extends Plugin
                                                 playerLoginStatusMap.replace(data[2], false);
                                                 getLogger().info("Set player '" + data[2] + "' status to 'not logged in'");
                                             }
-                                            else
-                                            {
-                                                getLogger().warning("Bad data received:\n" + sb);
-                                            }
-                                            break;
+                                            else getLogger().warning("Bad data received:\n" + sb);
                                         }
-                                        else
-                                        {
-                                            socket.close();
-                                            break;
-                                        }
+                                        else socket.close();
                                     }
                                 }
                                 catch(Throwable e) {}
