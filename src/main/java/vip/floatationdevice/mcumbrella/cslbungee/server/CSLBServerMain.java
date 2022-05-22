@@ -1,19 +1,22 @@
 package vip.floatationdevice.mcumbrella.cslbungee.server;
 
 import net.md_5.bungee.BungeeCord;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashSet;
 
 public class CSLBServerMain extends Plugin
 {
     int port = 14514;
     public static CSLBServerMain main;
-    static HashMap<String, Boolean> playerLoginStatusMap = new HashMap<String, Boolean>();
+    static HashSet<String> unloggedPlayers = new HashSet<String>();
     static HashSet<String> cmdWhitelist = new HashSet<String>();
 
     public void onEnable()
@@ -37,8 +40,6 @@ public class CSLBServerMain extends Plugin
                         + "/bindmail" + System.getProperty("line.separator")
                         + "/resetpassword" + System.getProperty("line.separator")
                         + "/repw" + System.getProperty("line.separator")
-                        + "this_message-canbypass=CSL~Bungee`anytime" + System.getProperty("line.separator")
-                        + "/thisCMD" + System.getProperty("line.separator")
                 );
                 bw.flush();
                 bw.close();
@@ -69,13 +70,11 @@ public class CSLBServerMain extends Plugin
         {
             public void run()
             {
-                try
+                // bind to 127.0.0.1:14514
+                try(ServerSocket server = new ServerSocket(port, 50, InetAddress.getLoopbackAddress()))
                 {
-                    @SuppressWarnings("resource")
-                    ServerSocket server = new ServerSocket(port);
-                    getLogger().info("CSLBungee server started.");
-                    System.out.println("CSLBungee server listening on port " + port);
-                    for(; ; )
+                    getLogger().info("CSLBungee server listening on port " + port);
+                    for(; ; ) // infinite loop to accept connections
                     {
                         Socket socket = server.accept();
                         new Thread("CSLBungee-Server Connection Processor")
@@ -100,7 +99,7 @@ public class CSLBServerMain extends Plugin
                                     if((len = inputStream.read(bytes)) != -1)
                                     {
                                         sb.append(new String(bytes, 0, len, StandardCharsets.UTF_8));
-                                        if(sb.toString().startsWith("CSLBungee-Client-1.0"))
+                                        if(sb.toString().startsWith("CSLBungee-Client-1.0\r\n"))
                                         {
                                             socket.close();
                                             String[] data = sb.toString().split("\r\n");
@@ -111,12 +110,12 @@ public class CSLBServerMain extends Plugin
                                             }
                                             if(data[1].equals("S"))
                                             {
-                                                playerLoginStatusMap.replace(data[2], true);
+                                                unloggedPlayers.remove(data[2]);
                                                 getLogger().info("Set player '" + data[2] + "' status to 'logged in'");
                                             }
                                             else if(data[1].equals("U"))
                                             {
-                                                playerLoginStatusMap.replace(data[2], false);
+                                                unloggedPlayers.add(data[2]);
                                                 getLogger().info("Set player '" + data[2] + "' status to 'not logged in'");
                                             }
                                             else getLogger().warning("Bad data received:\n" + sb);
@@ -136,11 +135,12 @@ public class CSLBServerMain extends Plugin
                 }
             }
         }.start();
-        getLogger().info("Enabled.");
+        BungeeCord.getInstance().getConsole().sendMessage(new ComponentBuilder("CSLBungee-Server version " + getDescription().getVersion()).color(ChatColor.GREEN).create());
+        BungeeCord.getInstance().getConsole().sendMessage(new ComponentBuilder("https://github.com/MCUmbrella/CSLBungee-Server").color(ChatColor.GREEN).underlined(true).create());
     }
 
     public void onDisable()
     {
-        getLogger().info("Disabled");
+        getLogger().info("Disabled.");
     }
 }
