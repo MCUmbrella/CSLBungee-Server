@@ -15,9 +15,7 @@ public class CSLBServerEventListener implements Listener
         {
             String[] cmd = e.getMessage().split(" ");
             if(!CSLBServerMain.cmdWhitelist.contains(cmd[0]))
-            {
                 e.setCancelled(true);
-            }
         }
     }
 
