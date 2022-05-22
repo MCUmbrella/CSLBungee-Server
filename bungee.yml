@@ -1,4 +1,4 @@
 name: CSLBungeeServer
-main: vip.floatationdevice.mcumbrella.cslbungee.server.CSLBS
+main: vip.floatationdevice.mcumbrella.cslbungee.server.CSLBServerMain
 version: 2.0.0
 author: MCUmbrella

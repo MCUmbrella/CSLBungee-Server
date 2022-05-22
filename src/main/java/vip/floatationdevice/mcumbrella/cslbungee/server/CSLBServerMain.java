@@ -8,16 +8,16 @@ import java.text.SimpleDateFormat;
 import java.io.*;
 import java.util.*;
 
-public class CSLBS extends Plugin
+public class CSLBServerMain extends Plugin
 {
 	int port=14514;
-	public static CSLBS main;
+	public static CSLBServerMain main;
 	long round=0;
 	static HashMap<String, Boolean> P = new HashMap<String, Boolean>();
 	static HashSet<String> cmdWhitelist = new HashSet<String>();
 	public void onEnable()
 	{
-		CSLBS.main=this;
+		CSLBServerMain.main=this;
 		getLogger().info("Enabling.");
 		try
 		{
@@ -61,8 +61,8 @@ public class CSLBS extends Plugin
 			cmdWhitelist.add("/resetpassword");
 			cmdWhitelist.add("/repw");
 		}
-		getProxy().getPluginManager().registerCommand(this, new CSLBSC("cslbs"));
-		getProxy().getPluginManager().registerListener(this, new CSLBSE());
+		getProxy().getPluginManager().registerCommand(this, new CSLBServerCommand("cslbs"));
+		getProxy().getPluginManager().registerListener(this, new CSLBServerEventListener());
 		new Thread("CSLBungee Server")
 		{
 			public void run()
@@ -83,28 +83,7 @@ public class CSLBS extends Plugin
 				    		boolean dataValid=true;
 				    		public void run()
 				    		{
-				    			long thisRound=++round; //used for debug and counting rounds
-				    			//getLogger().info("Round "+thisRound); DEBUG
-				    			
-				    			/* Timer: used to detect if a round took too many time to process.
-				    			 * Doesn't work as expected.
-				    			 * Fortunately it doesn't seem to have much impact on this version of CSLBungee Server.
-				    			 * Expected: Skip a round which took more than 1s to process.
-				    			new Thread("CSLBungee-Server Connection Timer")
-						    	{
-						    		public void run()
-						    		{
-						    			//getLogger().info("Timer started"); DEBUG
-						    			try {
-											Thread.sleep(1000);
-											if(!dataValid) {socket.close();getLogger().warning("Round "+thisRound+" took more 1s to process. Skipping");}
-										} catch (Throwable e) {
-											e.printStackTrace();
-										}
-						    		}
-						    	}.start();
-				    			*/
-				    			
+				    			long thisRound=++round;
 				    			InputStream inputStream = null;
 								try {
 									inputStream = socket.getInputStream();
@@ -178,7 +157,6 @@ public class CSLBS extends Plugin
 									    }
 
 							    }catch(Throwable e) {}
-							    //getLogger().info("Round "+thisRound+" end"); DEBUG
 				    		}
 				    	}.start();
 				    					    

@@ -4,9 +4,9 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import net.md_5.bungee.api.plugin.*;
 
-public class CSLBSC extends Command {
+public class CSLBServerCommand extends Command {
 
-	public CSLBSC(String name) {
+	public CSLBServerCommand(String name) {
 		super("cslbs");
 	}
 
@@ -19,16 +19,16 @@ public class CSLBSC extends Command {
 			{s.sendMessage(new ComponentBuilder("Hello world!").color(ChatColor.GREEN).create());}
 			else if(args[0].equals("l"))
 			{
-				s.sendMessage(new ComponentBuilder("List of recorded players:\n\t"+CSLBS.P).color(ChatColor.GREEN).create());
+				s.sendMessage(new ComponentBuilder("List of recorded players:\n\t"+ CSLBServerMain.P).color(ChatColor.GREEN).create());
 			}
 			else if(args[0].toLowerCase().equals("s")&&args.length==2)
 			{
-				CSLBS.P.put(args[1],true);
+				CSLBServerMain.P.put(args[1],true);
 				s.sendMessage(new ComponentBuilder("Set '"+args[1]+"'s status to 'logged in'").color(ChatColor.GREEN).create());
 			}
 			else if(args[0].toLowerCase().equals("u")&&args.length==2)
 			{
-				CSLBS.P.put(args[1],false);
+				CSLBServerMain.P.put(args[1],false);
 				s.sendMessage(new ComponentBuilder("Set '"+args[1]+"'s status to 'not logged in'").color(ChatColor.GREEN).create());
 			}
 			else
