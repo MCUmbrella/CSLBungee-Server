@@ -1,3 +1,3 @@
 # CSLBungee-Server
 ### CatSeedLogin BungeeCord支持（Bungee端专用）
-稳定版本在`stable`分支
+下载Bukkit端插件请去https://github.com/MCUmbrella/CSLBungee-Client/
