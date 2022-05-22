@@ -39,5 +39,4 @@ public class CSLBServerCommand extends Command
         else
             s.sendMessage(new ComponentBuilder("Error executing command").color(ChatColor.RED).create());
     }
-
 }
